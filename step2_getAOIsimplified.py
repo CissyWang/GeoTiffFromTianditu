@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 """
 获得AOI不需要 api是一个网页。
 但坐标转化需要key，日限额4000
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         # 保存数据
         f.close()
         poi.to_csv(inputP, index=False)
-=======
+
 # 爬取AOI 简化后
 # 爬取后，用step2.1 转换坐标为WGS48
 
@@ -240,4 +240,4 @@ if __name__ == '__main__':
         time.sleep(random.uniform(1.0, 5.0))  # 随机休眠
     # 保存数据
     f.close()
->>>>>>> 2ce2f1a867bb63808725c413d35502e2bad57845
+

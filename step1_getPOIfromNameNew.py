@@ -119,14 +119,12 @@ key.append('gaDCgieETZSoa2l8skP7jOM7sdPo89vp')
 
 if __name__ == '__main__':
 
-    # 若不存在按城市groupby的文件，则先groupby
-    # if not os.path.exists('forChina/collegeSort.csv'):  # 'forChina/universitySort.csv'
-    #     groupbyCity('forChina/chineseUniversity2021_college.csv')  # 'E:/greenland_Campus/UniversityInNanjing.csv'
-    list = 'forChina/collegeSort.csv'
+    list = 'forChina/collegeSort.csv' # 这边的文件是按照本科和专科分开的，也可以不分开
     try:
         poi = pd.read_csv(list)
     except FileNotFoundError:
-        groupbyCity('forChina/chineseUniversity2021_college.csv',list)  # 'E:/greenland_Campus/UniversityInNanjing.csv'
+        # 若不存在按城市groupby的文件，则先groupby, 按照城市分组方便分类：
+        groupbyCity('forChina/chineseUniversity2021_college.csv',list)  # 'forNanjing/UniversityInNanjing.csv'
         poi = pd.read_csv(list)
 
     jsonPath = 'forChina/college_poi1.json'
@@ -134,5 +132,5 @@ if __name__ == '__main__':
     # 第一遍爬取 获取json 超过配额的有概率获得不到
     firstRequest(0, len(poi), jsonPath, key)
 
-    # 第二遍爬 把没得到的再补充一下
+    # 第二遍爬用这行代码↓ 把没得到的再补充一下
     #replace302(poi, jsonPath)

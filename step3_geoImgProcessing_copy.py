@@ -61,7 +61,7 @@ def divideImg(out_dir, name, in_path, hsv_domain):
         # 第四个，道路部分 num = 3
 
         path2 = out_dir[num] + name + '_{}.png'.format(i)
-        if not os.path.exists(path2):
+        if replaceN or not os.path.exists(path2):
             mask = cv2.inRange(hsv, lowerb=np.array([0, 80, 80]),
                                upperb=np.array([130, 255, 255]))  # 提取紫色h=0~30、黄、橙道路，主要道路
             gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)  # 转为灰度图
@@ -69,6 +69,7 @@ def divideImg(out_dir, name, in_path, hsv_domain):
             gray_contrary = 255 - gray
             mask_img = cv2.add(src, np.zeros(np.shape(src), dtype=np.uint8), mask=gray_contrary + mask)
             cv2.imwrite(path2, mask_img)
+
         pathN[num][i] = path2
 
     return pathN
@@ -85,19 +86,19 @@ def latlon_to_xyz(lat, lon):
     return math.floor(tile_count * x), math.floor(tile_count * y)
 
 
-def download_tile(x, y, tile_server, path, n):
+def download_tile(x, y, tile_server, path, n,replaceN):
     num = 0
     path_out = []
 
     for i in range(-n, n + 1):
         for j in range(-n, n + 1):
             name = path + '_' + str(num) + '.png'
-            # if not os.path.exists(name):
-            url = tile_server.replace(
-                "{x}", str(x + j)).replace(
-                "{y}", str(y + i)).replace(
-                "{z}", str(zoom))
-            request.urlretrieve(url, name)
+            if replaceN or not os.path.exists(name):
+                url = tile_server.replace(
+                    "{x}", str(x + j)).replace(
+                    "{y}", str(y + i)).replace(
+                    "{z}", str(zoom))
+                request.urlretrieve(url, name)
                 # time.sleep(random.uniform(2, 5))
             num += 1
             path_out.append(name)
@@ -148,41 +149,60 @@ if __name__ == '__main__':
         if not os.path.exists("H:/layers/" + t + '/'):
             os.mkdir("H:/layers/" + t + '/')
 
-    for i in {6,61,161,237,357,433,1259,1260,1261,1262}:  # 对每一个学校
+    replaceN = True
+
+    for i in range(234,509):  #
+        # 对每一个学校234~509
         # 读取经纬度+ FID
         fid = data['FID'][i]
-        lat = data['latC'][i]
-        lon = data['lngC'][i]
+        if math.fabs(float(data["latN"][i])-float(data["latC"][i]))>0.002 or math.fabs(float(data["lngN"][i])-float(data["lngC"][i]))>0.002:
+            replaceN = True
+            lat = data['latC'][i]
+            lon = data['lngC'][i]
+            keyN = random.randint(0, 4)
+            print(fid,"download again")
+
+        else:
+            replaceN = False
+            lat = data['latN'][i]
+            lon = data['lngN'][i]
+            keyN = 0
         x, y = latlon_to_xyz(lat, lon)  # 计算行列数
         campus_name = 'campus_{}'.format(fid)
-        # keyN = random.randint(0,4)
-        keyN = 0
-        # step 1 下载瓦片,如果已有不会重复下载，仅制作路径
-        # print(tile_server + keys[keyN])
-        vec_path = download_tile(x, y, tile_server + keys[keyN], dir_path[0] + campus_name, n)  # 下载瓦片
-        img_path = download_tile(x, y, tile_server_img + keys[keyN], dir_path[1] + campus_name, n)  # 下载瓦片
+
+        # 下载瓦片,如果已有不会重复下载，仅制作路径
+        try:
+            vec_path = download_tile(x, y, tile_server + keys[keyN], dir_path[0] + campus_name, n,replaceN)  # 下载瓦片
+            img_path = download_tile(x, y, tile_server_img + keys[keyN], dir_path[1] + campus_name, n,replaceN)  # 下载瓦片
+        except:
+            keyN=(keyN+1)%5
+            vec_path = download_tile(x, y, tile_server + keys[keyN], dir_path[0] + campus_name, n, replaceN)  # 下载瓦片
+            img_path = download_tile(x, y, tile_server_img + keys[keyN], dir_path[1] + campus_name, n, replaceN)  # 下载瓦片
 
         path01 = np.array([vec_path, img_path])
 
-        # step3 将地图瓦片，按颜色分割成多张，4，如果已有不会重复处理
+        # 将地图瓦片，按颜色分割成多张，4，如果已有不会重复处理
         path02 = divideImg(dir_path[2:], campus_name, vec_path, hsv_domain)  # 输入vec_path
         path_all = np.concatenate((path01, path02))
 
-        # step4 为每张增加坐标信息
+        # 计算每张的坐标信息
         bounds = tile_edges(x, y, zoom, n)
-        # step 2 合成一张图
 
         for p in range(len(path_all)):
             path_out = "H:/layers/" + type01[p] + '/' + campus_name + '.png'
-            # if not os.path.exists(path_out):
-            image_compose(n, path_out, path_all[p])
+            # 合成一张图
+            if replaceN or not os.path.exists(path_out):
+                image_compose(n, path_out, path_all[p])
 
             path_out_tiff = path_out.replace('png', 'tiff')
             # if not os.path.exists(path_out_tiff):
+            # 加入地理信息
             gdal.Translate(path_out_tiff,
                            path_out,
                            outputSRS='EPSG:4326',
-                           outputBounds=bounds,options=["COMPRESS=LSW"])
+                           outputBounds=bounds,options=['COMPRESS=LSW','TILED=YES']) # 这里加了压缩，平铺使用yes
 
         print(campus_name + ' is done')
-        time.sleep(random.uniform(5, 15))
+        if replaceN:
+            time.sleep(random.uniform(2, 5))
+
