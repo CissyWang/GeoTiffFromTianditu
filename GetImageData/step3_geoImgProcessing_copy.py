@@ -59,7 +59,6 @@ def divideImg(out_dir, name, in_path, hsv_domain):
             num += 1
 
         # 第四个，道路部分 num = 3
-
         path2 = out_dir[num] + name + '_{}.png'.format(i)
         if replaceN or not os.path.exists(path2):
             mask = cv2.inRange(hsv, lowerb=np.array([0, 80, 80]),
