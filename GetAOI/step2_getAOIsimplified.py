@@ -176,9 +176,9 @@ def bdTrans(geo,headers):
             geox = geox + ';' + tx
         # 百度坐标转换API， 6百度坐标，5 百度bd09经纬度坐标.现在一次只能转10个
         bdzb_url = 'http://api.map.baidu.com/geoconv/v1/?coords=' + geox.lstrip(
-            ';') + '&from=6&to=5&ak=w9HGFgmL64By3EbCf8ukfEIwx4uCqHjk'
+            ';') + '&from=6&to=5&ak=w9**************Hjk'
         # bdzb_url = 'http://api.map.baidu.com/geoconv/v1/?coords=' + geox.lstrip(
-        #     ';') + '&from=6&to=1&ak=w9HGFgmL64By3EbCf8ukfEIwx4uCqHjk'
+        #     ';') + '&from=6&to=1&ak=w9*************Hjk'
         zb_data_wb = requests.get(bdzb_url, headers=headers)  # 根据经纬度获取信息
         zb_data = json.loads(zb_data_wb.text)
         # print(type(zb_data['result']))
