@@ -112,10 +112,10 @@ def replace302(poi, json_path):
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
 key = []
-key.append('w9HGFgmL64By3EbCf8ukfEIwx4uCqHjk')  # 自行申请的百度AK
-key.append('HFly4BCwoY2f3kjcuopCR1nbFrF3YMho')  # 自行申请的百度AK
-key.append('GnLqcl4dCZltgWZ2XS1Aa9bystTGbsE0')
-key.append('gaDCgieETZSoa2l8skP7jOM7sdPo89vp')
+key.append('****************************')  # 自行申请的百度AK
+key.append('****************************')  # 自行申请的百度AK
+key.append('****************************')
+key.append('****************************')
 
 if __name__ == '__main__':
 
